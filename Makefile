@@ -11,7 +11,7 @@ all: frequency
 #	$(CC) $(FLAGS) -o frequency $(OBJ)
 
 frequency: main.c
-	$(CC) $(FLAGS) -c main.c -o frequency
+	$(CC) $(FLAGS) main.c -o frequency
 
 clean:
 	rm -f *.o *.a *.so frequency
