@@ -8,11 +8,21 @@ typedef struct node {
     char letter;
     int is_root;
     int word_end;
-    int longest_word;
     unsigned int dist_from_stem;
     struct node *children[NUM_LETTERS];
 } node;
 
+node * init(){
+    struct node *n = (node *) malloc(sizeof(struct node));
+    n->dist_from_stem=0;
+    n->letter = 0;
+    n->word_end=0;
+    n->is_root=0;
+    for (int i = 0; i < NUM_LETTERS; ++i) {
+        n->children[i] = NULL;
+    }
+    return n;
+}
 
 void print_lexicographic(node *head, char *s){
     if(head == NULL) return;
@@ -48,21 +58,23 @@ void freeAll(node *head){
     }
     free(head);
 }
-//check if letter in the right place
+
 int main(int argc, char *argv[]) {
-    node* head = (node *) malloc(sizeof(struct node));
+    node* head = init();
     head -> is_root = 1;
     head->dist_from_stem=0;
     struct node *ptr = head;
     int letter;
     int counter = 0;
+    int longest_word = 0;
     do{
         letter = fgetc(stdin);
         if(letter != ' ' && letter != '\n' && letter != '\t' && letter != EOF) {
             if(isalpha(letter)){
                 counter+=1;
                 if (ptr->children[letter - 97] == NULL) {
-                    ptr->children[letter - 97] = (node *) malloc(sizeof(struct node));
+//                    ptr->children[letter - 97] = (node *) malloc(sizeof(struct node));
+                    ptr->children[letter - 97] = init();
                     ptr->children[letter - 97]->dist_from_stem = ptr -> dist_from_stem+1;
                     ptr->children[letter - 97]->letter = (char)letter;
                 }
@@ -72,18 +84,17 @@ int main(int argc, char *argv[]) {
             if(!(ptr -> is_root)){
                 ptr -> word_end += 1;
             }
-            if(counter>head->longest_word){
-                head->longest_word=counter;
+            if(counter>longest_word){
+                longest_word = counter;
                 counter = 0;
             }
             ptr = head;
         }
     }while (letter!=EOF);
-    int count = head->longest_word;
     if(argc==1){
         for(int i = 0; i<NUM_LETTERS;i++){
             if(head->children[i] != NULL) {
-                char *s = (char *) malloc((count + 1) * sizeof(char));
+                char *s = (char *) malloc((longest_word + 1) * sizeof(char));
                 print_lexicographic(head->children[i], s);
                 free(s);
             }
@@ -91,13 +102,12 @@ int main(int argc, char *argv[]) {
     }else if(*argv[1]=='r'){
         for(int i = NUM_LETTERS-1; i>=0;i--){
             if(head->children[i] != NULL) {
-                char *s = (char *) malloc((count + 1) * sizeof(char));
+                char *s = (char *) malloc((longest_word + 1) * sizeof(char));
                 print_reverse_lexicographic(head->children[i], s);
                 free(s);
             }
         }
     }
     freeAll(head);
-//    free(head);
     exit(0);
 }
