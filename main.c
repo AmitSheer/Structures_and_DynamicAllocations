@@ -14,6 +14,7 @@ typedef struct node {
 
 node * init(){
     struct node *n = (node *) malloc(sizeof(struct node));
+    if(!n) return NULL;
     n->dist_from_stem=0;
     n->letter = 0;
     n->word_end=0;
@@ -58,11 +59,8 @@ void freeAll(node *head){
     }
     free(head);
 }
-
-int main(int argc, char *argv[]) {
-    node* head = init();
+int read(node* head){
     head -> is_root = 1;
-    head->dist_from_stem=0;
     struct node *ptr = head;
     int letter;
     int counter = 0;
@@ -73,8 +71,10 @@ int main(int argc, char *argv[]) {
             if(isalpha(letter)){
                 counter+=1;
                 if (ptr->children[letter - 97] == NULL) {
-//                    ptr->children[letter - 97] = (node *) malloc(sizeof(struct node));
                     ptr->children[letter - 97] = init();
+                    if(!ptr->children[letter - 97]){
+                        return 0;
+                    }
                     ptr->children[letter - 97]->dist_from_stem = ptr -> dist_from_stem+1;
                     ptr->children[letter - 97]->letter = (char)letter;
                 }
@@ -91,23 +91,33 @@ int main(int argc, char *argv[]) {
             ptr = head;
         }
     }while (letter!=EOF);
+    return longest_word;
+}
+int main(int argc, char *argv[]) {
+    node* head = init();
+    if(!head) exit(0);
+    int longest_word = read(head);
+    if(!longest_word){
+        freeAll(head);
+    }
+    char *s = (char *) malloc((longest_word + 1) * sizeof(char));
+    if(!s){
+        freeAll(head);
+        exit(0);
+    }
     if(argc==1){
         for(int i = 0; i<NUM_LETTERS;i++){
             if(head->children[i] != NULL) {
-                char *s = (char *) malloc((longest_word + 1) * sizeof(char));
                 print_lexicographic(head->children[i], s);
-                free(s);
             }
         }
     }else if(*argv[1]=='r'){
         for(int i = NUM_LETTERS-1; i>=0;i--){
             if(head->children[i] != NULL) {
-                char *s = (char *) malloc((longest_word + 1) * sizeof(char));
                 print_reverse_lexicographic(head->children[i], s);
-                free(s);
             }
         }
     }
+    free(s);
     freeAll(head);
-    exit(0);
 }
